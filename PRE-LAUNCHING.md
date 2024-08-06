@@ -26,6 +26,13 @@ import { GasPriceModule } from './gas-price/gas-price.module';
 export class AppModule {}
 ```
 
+++++++++++++++++++++++++++++++++++++++++++++++++++ Rate Limiting
+
+
+
+
+
+
 ### 2. CORS Configuration
 Ensure that Cross-Origin Resource Sharing (CORS) is properly configured to restrict which domains can access your API.
 
@@ -91,10 +98,18 @@ export class AppModule {
 }
 ```
 
+
+++++++++++++++++++++++++++++++++++++++++++++++++++ Security Best Practices
+
+
 ### 4. Performance Optimization
 - **Caching:** Use caching strategies to reduce load and improve performance.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++ Caching
+
 - **Load Balancing:** Use load balancers to distribute traffic across multiple servers.
 - **Database Optimization:** Ensure your database queries are optimized and indexes are properly set.
+
 
 ### 5. Logging and Monitoring
 Implement logging and monitoring to keep track of your API’s performance and troubleshoot issues.
@@ -112,6 +127,8 @@ logger.error('Error occurred', error.stack);
 **Monitoring Tools:**
 - **Prometheus/Grafana:** For monitoring and alerting.
 - **New Relic/Datadog:** For application performance monitoring.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++ Caching
 
 ### 6. Documentation
 Provide clear documentation for your API endpoints using tools like Swagger.
