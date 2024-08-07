@@ -1,30 +1,26 @@
 const RabbitMQPublisher = require('./rabbitmq-publisher');
 const cron = require('node-cron');
 
-async function publishToSatoshiCandlesChannel(msg) {
-    const CHANNEL = 'gas-price-update';
-    const rabbitUrl = 'amqp://localhost';
-    const publisher = new RabbitMQPublisher(rabbitUrl);
+// --- CONFIG
+const CHANNEL = "gas-price-update";
+const RABBIT_MQ_ENDPOINT_DEV = 'amqp://localhost';
+const GAS_PRICE_CRON_SCHEDULE_INTERVAL = "*/7 * * * * *";
 
+async function publishToGasPriceUpdate(msg) {
     try {
+        const publisher = new RabbitMQPublisher(RABBIT_MQ_ENDPOINT_DEV);
         await publisher.connect();
-
-        console.log('--- Publishing new MSG to -> #gas-price-update');
-
         const published = await publisher.publish(CHANNEL, JSON.stringify(msg));
-
-        console.log('--- Message has been published:', published);
-        console.log('------------------------------\n\n');
     } catch (error) {
-        console.error('Error:', error);
+        throw new Error('Error:', error);
     } finally {
         await publisher.close();
     }
 }
 
 function scheduleGasPriceUpdate() {
-    cron.schedule('*/7 * * * * *', async () => {
-        await publishToSatoshiCandlesChannel({});
+    cron.schedule(GAS_PRICE_CRON_SCHEDULE_INTERVAL, async () => {
+        await publishToGasPriceUpdate({});
     });
 }
 

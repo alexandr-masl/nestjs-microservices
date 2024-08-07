@@ -1,9 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { ethers } from 'ethers';
 import RabbitMQConsumer from './rabbitmq-consumer';
+import {PATHS, EVENTS, ERROR_MESSAGES, INFO_MESSAGES} from "../../config/constants";
 
 @Injectable()
 export class CronJobService implements OnModuleInit {
@@ -12,28 +12,20 @@ export class CronJobService implements OnModuleInit {
   private rabbitMQConsumer: RabbitMQConsumer;
 
   constructor(
-    private configService: ConfigService,
     @InjectRedis() private readonly redisClient: Redis,
   ) {
-    const alchemyApiKey = this.configService.get<string>('ALCHEMY_API_KEY');
-    if (!alchemyApiKey) {
-      this.logger.error('Alchemy API Key is not configured');
-      throw new Error('Alchemy API Key is not configured');
-    }
-    this.provider = new ethers.JsonRpcProvider(`https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`);
 
-    // const devMode = process.env.NODE_ENV !== 'production';
-    // const rabbitUrl = devMode ? 'amqp://localhost' : 'amqp://guest:guest@rabbitmq';
-    const rabbitUrl = 'amqp://localhost';
+    this.provider = new ethers.JsonRpcProvider(PATHS.ALCHEMY_API);
+    const rabbitUrl = PATHS.RABBIT_MQ_ENDPOINT_DEV;
     this.rabbitMQConsumer = new RabbitMQConsumer(rabbitUrl);
   }
 
   async onModuleInit() {
     await this.rabbitMQConsumer.connect();
-    await this.rabbitMQConsumer.consume('gas-price-update', async (msg) => {
+    await this.rabbitMQConsumer.consume(EVENTS.GAS_PRICE_UPDATE, async (msg) => {
       if (msg) {
         await this.fetchGasPrice();
-        this.logger.log('Gas price updated');
+        this.logger.log(INFO_MESSAGES.GAS_PRICE_UPDATED);
       }
     });
 
@@ -44,10 +36,10 @@ export class CronJobService implements OnModuleInit {
     try {
       const feeData = await this.provider.getFeeData();
       const formattedGasPrice = ethers.formatUnits(feeData.gasPrice, 'gwei');
-      this.logger.log(`Fetched gas price: ${formattedGasPrice}`);
-      await this.redisClient.set('gasPrice', formattedGasPrice, 'EX', 60); // Cache for 60 seconds
+      this.logger.log(`${INFO_MESSAGES.GAS_PRICE_FETCHED}: ${formattedGasPrice}`);
+      await this.redisClient.set(PATHS.GAS_PRICE, formattedGasPrice, 'EX', 60);
     } catch (error) {
-      this.logger.error('Error fetching or setting gas price:', error);
+      this.logger.error(ERROR_MESSAGES.GAS_PRICE_FETCH_ERROR, error);
     }
   }
 }

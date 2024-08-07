@@ -1,4 +1,4 @@
-const { connect, Connection, Channel } = require('amqplib');
+const { connect } = require('amqplib');
 
 class RabbitMQPublisher {
     constructor(url) {
