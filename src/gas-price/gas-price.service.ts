@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
@@ -16,6 +16,10 @@ export class GasPriceService {
     @InjectRedis() private readonly redisClient: Redis,
   ) {
     const alchemyApiKey = this.configService.get<string>('ALCHEMY_API_KEY');
+    if (!alchemyApiKey) {
+      this.logger.error('Alchemy API Key is not configured');
+      throw new Error('Alchemy API Key is not configured');
+    }
     this.provider = new ethers.JsonRpcProvider(`https://eth-mainnet.alchemyapi.io/v2/${alchemyApiKey}`);
     this.scheduleGasPriceUpdate();
   }
@@ -47,12 +51,12 @@ export class GasPriceService {
     try {
       const gasPrice = await this.redisClient.get('gasPrice');
       if (!gasPrice) {
-        throw new Error('Gas price not available in cache');
+        throw new HttpException('Gas price not available', HttpStatus.NOT_FOUND);
       }
       return { gasPrice };
     } catch (error) {
-      this.logger.error('Error retrieving gas price from Redis:', error);
-      throw new Error('Failed to retrieve gas price');
+      this.logger.error('Error retrieving gas price:', error);
+      throw new HttpException('Failed to retrieve gas price', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

@@ -175,3 +175,15 @@ async function bootstrap() {
 }
 bootstrap();
 ```
+
+
+-------------------------- PORT ----------------------------------
+
+Best Practices for Port Configuration in Production
+
+1) Environment Variables: Use environment variables to specify the port. This makes your application more flexible and configurable without changing the code.
+
+2) Reverse Proxy: Use a reverse proxy like Nginx or HAProxy in front of your application. The reverse proxy can listen on standard HTTP/HTTPS ports (80 and 443) and forward requests to your application running on a specific port (e.g., 3000).
+
+3) Security and Isolation: Avoid exposing your application directly to the internet. Instead, expose only the reverse proxy to the public and keep your application server running on an internal network.
+

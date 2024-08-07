@@ -13,7 +13,7 @@ describe('GasPriceController', () => {
         {
           provide: GasPriceService,
           useValue: {
-            getCachedGasPrice: jest.fn().mockResolvedValue('4.024355284'),
+            getCachedGasPrice: jest.fn().mockResolvedValue({ gasPrice: '4.024355284' }),
           },
         },
       ],
