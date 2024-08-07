@@ -1,13 +1,13 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { GasPriceService } from './gas-price/gas-price.service';
-import { GasPriceController } from './gas-price/gas-price.controller';
 import { RedisConfigService } from '../config/redis.config';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import helmet from 'helmet';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { CronJobService } from './cron-job/cron-job.service';
+import { GasPriceModule } from './gas-price/gas-price.module';
 
 @Module({
   imports: [
@@ -20,14 +20,14 @@ import { APP_GUARD } from '@nestjs/core';
       useClass: RedisConfigService,
     }),
     ConfigModule.forRoot(),
+    GasPriceModule
   ],
-  controllers: [GasPriceController],
   providers: [
-    GasPriceService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    CronJobService,
   ],
 })
 export class AppModule implements NestModule {
