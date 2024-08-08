@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import helmet from 'helmet';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SWAGGER } from '../config/constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,11 +22,11 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Gas Price API')
-    .setDescription('API to fetch gas prices')
-    .setVersion('1.0')
-    .addTag('gasPrice')
-    .build();
+  .setTitle(SWAGGER.API.TITLE)
+  .setDescription(SWAGGER.API.DESCRIPTION)
+  .setVersion(SWAGGER.API.VERSION)
+  .addTag(SWAGGER.API.TAG)
+  .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 

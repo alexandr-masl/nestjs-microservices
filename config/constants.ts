@@ -31,6 +31,12 @@ export const INFO_MESSAGES = {
 }
 
 export const SWAGGER = {
+    API: {
+        TITLE: 'Trading Microservices API',
+        DESCRIPTION: 'API to fetch trading data',
+        VERSION: '1.0',
+        TAG: 'Trading API'
+    },
     GAS_PRICE: {
         TAG: 'Gas Price',
         SUMMARY: 'Get current gas price',
