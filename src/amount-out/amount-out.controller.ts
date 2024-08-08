@@ -1,37 +1,3 @@
-// import { Controller, Get, Param } from '@nestjs/common';
-// import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-// import { AmountOutService } from './amount-out.service';
-// import { AmountOutDto } from './amount-out.dto';
-// import { PATHS, SWAGGER } from '../../config/constants';
-
-// @ApiTags(PATHS.AMOUNT_OUT)
-// @Controller(PATHS.AMOUNT_OUT)
-// export class AmountOutController {
-//   constructor(private readonly AmountOutService: AmountOutService) {}
-
-//   @Get(':fromTokenAddress/:toTokenAddress/:amountIn')
-//   @ApiOperation({ summary: SWAGGER.AMOUNT_OUT.SUMMARY })
-//   @ApiResponse({ 
-//     status: SWAGGER.AMOUNT_OUT.RESPONSES.OK.status, 
-//     description: SWAGGER.AMOUNT_OUT.RESPONSES.OK.description, 
-//     type: AmountOutDto 
-//   })
-//   @ApiResponse({ 
-//     status: SWAGGER.AMOUNT_OUT.RESPONSES.ERROR.status, 
-//     description: SWAGGER.AMOUNT_OUT.RESPONSES.ERROR.description 
-//   })
-//   @ApiParam({ name: 'fromTokenAddress', required: true, description: 'Address of the from token' })
-//   @ApiParam({ name: 'toTokenAddress', required: true, description: 'Address of the to token' })
-//   @ApiParam({ name: 'amountIn', required: true, description: 'Amount to convert' })
-//   async getAmountOut(
-//     @Param('fromTokenAddress') fromTokenAddress: string,
-//     @Param('toTokenAddress') toTokenAddress: string,
-//     @Param('amountIn') amountIn: number
-//   ): Promise<AmountOutDto> {
-//     return this.AmountOutService.getAmountOut(fromTokenAddress, toTokenAddress, amountIn);
-//   }
-// }
-
 import { Controller, Get, Param, UsePipes } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AmountOutService } from './amount-out.service';

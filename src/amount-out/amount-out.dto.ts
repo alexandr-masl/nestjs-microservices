@@ -10,5 +10,5 @@ export class AmountOutDto {
   @IsNumberString()
   amountIn: number;
 
-  amountOut?: number;
+  amountOut?: string;
 }
