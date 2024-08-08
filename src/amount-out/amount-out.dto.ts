@@ -1,7 +1,14 @@
+import { IsEthereumAddress, IsNumberString } from 'class-validator';
+
 export class AmountOutDto {
-    fromTokenAddress: string;
-    toTokenAddress: string;
-    amountIn: number;
-    amountOut: number; // Replace with the actual result type
-  }
-  
+  @IsEthereumAddress()
+  fromTokenAddress: string;
+
+  @IsEthereumAddress()
+  toTokenAddress: string;
+
+  @IsNumberString()
+  amountIn: number;
+
+  amountOut?: number;
+}

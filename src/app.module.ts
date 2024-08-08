@@ -5,10 +5,11 @@ import { RedisConfigService } from '../config/redis.config';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import helmet from 'helmet';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { CronJobService } from './cron-job/cron-job.service';
 import { GasPriceModule } from './gas-price/gas-price.module';
 import { AmountOutModule } from './amount-out/amount-out.module';
+import { ValidationPipe } from '@nestjs/common';
 
 @Module({
   imports: [
@@ -28,6 +29,10 @@ import { AmountOutModule } from './amount-out/amount-out.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
     },
     CronJobService,
   ],
