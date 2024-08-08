@@ -3,6 +3,7 @@ config();
 
 export const PATHS = {
     GAS_PRICE: 'gasPrice',
+    AMOUNT_OUT: "return",
     RABBIT_MQ_ENDPOINT_DEV: 'amqp://localhost',
     RABBIT_MQ_ENDPOINT_PROD: `amqp://guest:guest@rabbitmq`,
     ALCHEMY_API: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`
@@ -52,4 +53,17 @@ export const SWAGGER = {
         },
         },
     },
+    AMOUNT_OUT: {
+        SUMMARY: 'Get the return value for the given token addresses and amount',
+        RESPONSES: {
+          OK: {
+            status: 200,
+            description: 'Return value successfully calculated',
+          },
+          ERROR: {
+            status: 400,
+            description: 'Invalid input parameters',
+          },
+        },
+      },
 };

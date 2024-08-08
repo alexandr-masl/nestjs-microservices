@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { CronJobService } from './cron-job/cron-job.service';
 import { GasPriceModule } from './gas-price/gas-price.module';
+import { AmountOutModule } from './amount-out/amount-out.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { GasPriceModule } from './gas-price/gas-price.module';
       useClass: RedisConfigService,
     }),
     ConfigModule.forRoot(),
-    GasPriceModule
+    GasPriceModule,
+    AmountOutModule
   ],
   providers: [
     {
