@@ -21,7 +21,7 @@ export class GasPriceService {
       return { gasPrice };
     } catch (error) {
       this.logger.error(ERROR_MESSAGES.GAS_PRICE_RETRIEVE_ERROR, error);
-      throw new HttpException(ERROR_MESSAGES.GAS_PRICE_RETRIEVE_FAIL, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(ERROR_MESSAGES.UNEXPECTED_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

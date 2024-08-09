@@ -1,4 +1,5 @@
-import { IsEthereumAddress, IsNumberString } from 'class-validator';
+import { IsEthereumAddress, IsPositive } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class AmountOutDto {
   @IsEthereumAddress()
@@ -7,7 +8,8 @@ export class AmountOutDto {
   @IsEthereumAddress()
   toTokenAddress: string;
 
-  @IsNumberString()
+  @Transform(({ value }) => parseFloat(value))
+  @IsPositive({ message: 'amountIn must be a positive number' })
   amountIn: number;
 
   amountOut?: string;
