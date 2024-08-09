@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
 import { GasPriceService } from './gas-price.service';
+import { DataCacheService } from '../shared/services/data-cache.service';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
-const mockRedisClient = {
-  set: jest.fn(),
-  get: jest.fn(),
+const mockDataCacheService = {
+  getCacheValue: jest.fn(),
 };
 
 describe('GasPriceService', () => {
@@ -15,21 +15,8 @@ describe('GasPriceService', () => {
       providers: [
         GasPriceService,
         {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => {
-              switch (key) {
-                case 'ALCHEMY_API_KEY':
-                  return 'dummy-alchemy-api-key';
-                default:
-                  return null;
-              }
-            }),
-          },
-        },
-        {
-          provide: 'IORedis', // Providing the Redis client directly with a token
-          useValue: mockRedisClient,
+          provide: DataCacheService,
+          useValue: mockDataCacheService,
         },
       ],
     }).compile();
@@ -37,7 +24,44 @@ describe('GasPriceService', () => {
     service = module.get<GasPriceService>(GasPriceService);
   });
 
-  // it('should be defined', () => {
-  //   expect(service).toBeDefined();
-  // });
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  it('should return gas price when cached value exists', async () => {
+    // Arrange
+    const cachedGasPrice = '100';
+    mockDataCacheService.getCacheValue.mockResolvedValue(cachedGasPrice);
+
+    // Act
+    const result = await service.getCachedGasPrice();
+
+    // Assert
+    expect(result).toEqual({ gasPrice: cachedGasPrice });
+    expect(mockDataCacheService.getCacheValue).toHaveBeenCalledWith('gasPrice'); // Changed 'GAS_PRICE' to 'gasPrice'
+  });
+
+  it('should throw HttpException when gas price is not available', async () => {
+    // Arrange
+    mockDataCacheService.getCacheValue.mockResolvedValue(null);
+  
+    // Act & Assert
+    await expect(service.getCachedGasPrice()).rejects.toThrowError(
+      new HttpException('An unexpected error occurred. Please try again later.', HttpStatus.INTERNAL_SERVER_ERROR),
+    );
+    expect(mockDataCacheService.getCacheValue).toHaveBeenCalledWith('gasPrice');
+  });
+  
+
+  it('should log error and throw HttpException on failure', async () => {
+    // Arrange
+    const error = new Error('Something went wrong');
+    mockDataCacheService.getCacheValue.mockRejectedValue(error);
+
+    // Act & Assert
+    await expect(service.getCachedGasPrice()).rejects.toThrowError(
+      new HttpException('An unexpected error occurred. Please try again later.', HttpStatus.INTERNAL_SERVER_ERROR),
+    );
+    expect(mockDataCacheService.getCacheValue).toHaveBeenCalledWith('gasPrice'); // Changed 'GAS_PRICE' to 'gasPrice'
+  });
 });

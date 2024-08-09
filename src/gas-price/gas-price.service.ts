@@ -1,7 +1,7 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { GasPriceDto } from './gas-price.dto';
 import { PATHS, ERROR_MESSAGES } from '../../config/constants';
-import { DataCacheService } from 'src/shared/services/data-cache.service';
+import { DataCacheService } from '../shared/services/data-cache.service';
 
 @Injectable()
 export class GasPriceService {

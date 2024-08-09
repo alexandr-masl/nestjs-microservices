@@ -4,7 +4,7 @@ import { ERROR_MESSAGES } from "../../../config/constants";
 import { TokenHandlerErrorData } from './error-handler';
 import { TokenBlockchainService } from './token-blockchain.service';
 import { TokenCalculationService } from './token-calculation.service';
-import { DataCacheService } from 'src/shared/services/data-cache.service';
+import { DataCacheService } from '../../shared/services/data-cache.service';
 
 @Injectable()
 export class TokenHandler {

@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ethers } from 'ethers';
 import RabbitMQConsumer from './handlers/rabbitmq-consumer';
 import {PATHS, EVENTS, ERROR_MESSAGES, INFO_MESSAGES} from "../../config/constants";
-import { DataCacheService } from 'src/shared/services/data-cache.service';
+import { DataCacheService } from '../shared/services/data-cache.service';
 
 @Injectable()
 export class CronJobService implements OnModuleInit {
