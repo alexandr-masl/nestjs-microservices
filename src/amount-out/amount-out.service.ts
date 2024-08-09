@@ -74,29 +74,45 @@ const provider = new ethers.JsonRpcProvider(PATHS.ALCHEMY_API);
 export class AmountOutService {
   async getAmountOut(fromTokenAddress: string, toTokenAddress: string, amountIn: number): Promise<AmountOutDto> {
     try {
-      const [reserve0, reserve1] = await this.getReserves(fromTokenAddress, toTokenAddress);
+
+
+      const [reserveOut, reserveIn] = await this.getReserves(fromTokenAddress, toTokenAddress);
+      
+      const reservesHashtable: { [address: string]: bigint } = {};
+      reservesHashtable[fromTokenAddress] = BigInt(reserveIn);
+      reservesHashtable[toTokenAddress] = BigInt(reserveOut);
+
+      const fromTokenDecimals = await this.getTokenDecimals(fromTokenAddress);
+      const toTokenDecimals = await this.getTokenDecimals(toTokenAddress);
+
+
+      console.log("\n\n")
+      console.log("::::::::::TOKEN IN:", fromTokenAddress, "::DECIMALS:", fromTokenDecimals);
+      console.log("::::::::::TOKEN OUT:", toTokenAddress, "::DECIMALS:", toTokenDecimals);
+      console.log("::::::::::RESERVE IN:", reservesHashtable[fromTokenAddress]);
+      console.log("::::::::::RESERVE OUT:", reservesHashtable[toTokenAddress]);
+
   
       // Convert amountIn from token units to Wei (assuming WETH which has 18 decimals)
       const amountInWei = ethers.parseUnits(amountIn.toString(), 18);
-  
-      const amountOut = this.calculateAmountOut(amountInWei, BigInt(reserve1), BigInt(reserve0));
-  
+
+      const amountOut = this.calculateAmountOut(amountInWei, reservesHashtable[fromTokenAddress], reservesHashtable[toTokenAddress]);
+
       console.log('Calculation:', {
         amountIn: amountInWei,
-        reserve0,
-        reserve1,
+        reserveOut,
+        reserveIn,
         amountOut,
       });
-  
-  
+
       const routerContract = new ethers.Contract(UNISWAP_V2_ROUTER02_ADDRESS, UNISWAP_V2_ROUTER02_ABI, provider);
       const verifiedAmountsOut = await routerContract.getAmountsOut(
         amountInWei,
         [fromTokenAddress, toTokenAddress]
       );
 
-      console.log('Verified Amountss Out FULL:');
-      console.log(verifiedAmountsOut) // Debug: print verification
+      // console.log('Verified Amountss Out FULL:');
+      // console.log(verifiedAmountsOut) // Debug: print verification
 
       const verifiedAmountOut_1 = verifiedAmountsOut[1];
       console.log('Verified Amountss Out:', verifiedAmountOut_1); // Debug: print verification
@@ -105,16 +121,13 @@ export class AmountOutService {
 
       const verifiedAmountOut_2 = await routerContract.getAmountOut(
         amountInWei,
-        reserve1,
-        reserve0
+        reservesHashtable[fromTokenAddress],
+        reservesHashtable[toTokenAddress]
       );
 
       console.log('Verified Amountss Out FULL 2:');
       console.log(verifiedAmountOut_2) // Debug: print verification
 
-      // const verifiedAmountOut = verifiedAmountsOut[1];
-      // console.log('Verified Amountss Out 2:', verifiedAmountOut); // Debug: print verification
-  
   
       return {
         fromTokenAddress,
@@ -127,15 +140,53 @@ export class AmountOutService {
     }
   }
 
+  async getTokenDecimals(tokenAddress: string): Promise<number> {
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      ['function decimals() view returns (uint8)'],
+      provider
+    );
+    return await tokenContract.decimals();
+  }
+
   async getReserves(fromTokenAddress: string, toTokenAddress: string): Promise<[number, number]> {
-    const factoryContract = new ethers.Contract(UNISWAP_V2_FACTORY_ADDRESS, UNISWAP_V2_FACTORY_ABI, provider);
-    const pairAddress = await factoryContract.getPair(fromTokenAddress, toTokenAddress);
+    // const factoryContract = new ethers.Contract(UNISWAP_V2_FACTORY_ADDRESS, UNISWAP_V2_FACTORY_ABI, provider);
+    // const pairAddress = await factoryContract.getPair(fromTokenAddress, toTokenAddress);
+    // console.log("::::::::::PAIR ADDRESS:", pairAddress);
+
+
+    function sortTokens(tokenA, tokenB) {
+      return tokenA.toLowerCase() < tokenB.toLowerCase()
+          ? [tokenA, tokenB]
+          : [tokenB, tokenA];
+    }
+
+
+    const INIT_CODE_HASH = '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f';
+
+    function getPairAddress(tokenA, tokenB) {
+      const [token0, token1] = sortTokens(tokenA, tokenB);
+  
+      const salt = ethers.solidityPackedKeccak256(['address', 'address'], [token0, token1]);
+      const addressBytes = ethers.solidityPacked(
+          ['bytes1', 'address', 'bytes32', 'bytes32'],
+          ['0xff', UNISWAP_V2_FACTORY_ADDRESS, salt, INIT_CODE_HASH]
+      );
+  
+      const pairAddress = ethers.getAddress(`0x${ethers.keccak256(addressBytes).slice(-40)}`);
+      return pairAddress;
+    }
+
+    const calculatedPairAddress = getPairAddress(toTokenAddress, fromTokenAddress);
+    console.log("::::::::::CALCULATED PAIR ADDRESS:", calculatedPairAddress);
+
+
     
     // if (pairAddress === ethers.constants.AddressZero) {
     //   throw new Error('Pair not found');
     // }
 
-    const pairContract = new ethers.Contract(pairAddress, UNISWAP_V2_PAIR_ABI, provider);
+    const pairContract = new ethers.Contract(calculatedPairAddress, UNISWAP_V2_PAIR_ABI, provider);
     const reserves = await pairContract.getReserves();
 
     return [reserves._reserve0, reserves._reserve1];
