@@ -1,7 +1,7 @@
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
-import { AmountOutDto } from './amount-out.dto';
-import { TokenHandler } from './token-handler';
-import { TokenHandlerErrorData } from './error-handler';
+import { AmountOutDto } from './dto/amount-out.dto';
+import { TokenHandler } from './handlers/token-handler';
+import { TokenHandlerErrorData } from './handlers/error-handler';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { ERROR_MESSAGES } from '../../config/constants';

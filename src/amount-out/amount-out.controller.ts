@@ -1,7 +1,7 @@
 import { Controller, Get, Param, UsePipes } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AmountOutService } from './amount-out.service';
-import { AmountOutDto } from './amount-out.dto';
+import { AmountOutDto } from './dto/amount-out.dto';
 import { PATHS, SWAGGER } from '../../config/constants';
 
 @ApiTags(PATHS.AMOUNT_OUT)
