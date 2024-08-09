@@ -1,9 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import Redis from 'ioredis';
 import { ethers } from 'ethers';
-import RabbitMQConsumer from './rabbitmq-consumer';
+import RabbitMQConsumer from './handlers/rabbitmq-consumer';
 import {PATHS, EVENTS, ERROR_MESSAGES, INFO_MESSAGES} from "../../config/constants";
+import { DataCacheService } from 'src/shared/services/data-cache.service';
 
 @Injectable()
 export class CronJobService implements OnModuleInit {
@@ -12,7 +11,7 @@ export class CronJobService implements OnModuleInit {
   private rabbitMQConsumer: RabbitMQConsumer;
 
   constructor(
-    @InjectRedis() private readonly redisClient: Redis,
+    private readonly dataCacheService: DataCacheService,  // Inject DataCacheService
   ) {
 
     this.provider = new ethers.JsonRpcProvider(PATHS.ALCHEMY_API);
@@ -37,7 +36,7 @@ export class CronJobService implements OnModuleInit {
       const feeData = await this.provider.getFeeData();
       const formattedGasPrice = ethers.formatUnits(feeData.gasPrice, 'gwei');
       this.logger.log(`${INFO_MESSAGES.GAS_PRICE_FETCHED}: ${formattedGasPrice}`);
-      await this.redisClient.set(PATHS.GAS_PRICE, formattedGasPrice, 'EX', 60);
+      await this.dataCacheService.setCacheValue(PATHS.GAS_PRICE, formattedGasPrice, 60);
     } catch (error) {
       this.logger.error(ERROR_MESSAGES.GAS_PRICE_FETCH_ERROR, error);
     }

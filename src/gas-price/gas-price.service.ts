@@ -1,20 +1,20 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import Redis from 'ioredis';
 import { GasPriceDto } from './gas-price.dto';
 import { PATHS, ERROR_MESSAGES } from '../../config/constants';
+import { DataCacheService } from 'src/shared/services/data-cache.service';
 
 @Injectable()
 export class GasPriceService {
   private readonly logger = new Logger(GasPriceService.name);
 
   constructor(
-    @InjectRedis() private readonly redisClient: Redis,
+    private readonly dataCacheService: DataCacheService,
   ) {}
 
   async getCachedGasPrice(): Promise<GasPriceDto> {
     try {
-      const gasPrice = await this.redisClient.get(PATHS.GAS_PRICE);
+      const gasPrice = await this.dataCacheService.getCacheValue(PATHS.GAS_PRICE) 
+      // await this.redisClient.get(PATHS.GAS_PRICE);
       if (!gasPrice) {
         throw new HttpException(ERROR_MESSAGES.GAS_PRICE_NOT_AVAILABLE, HttpStatus.NOT_FOUND);
       }

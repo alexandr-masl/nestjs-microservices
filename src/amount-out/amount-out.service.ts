@@ -1,20 +1,18 @@
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { AmountOutDto } from './dto/amount-out.dto';
-import { TokenHandler } from './handlers/token-handler';
+import { TokenHandler } from './handlers/token-handler.service';
 import { TokenHandlerErrorData } from './handlers/error-handler';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import Redis from 'ioredis';
 import { ERROR_MESSAGES } from '../../config/constants';
 
 
 @Injectable()
 export class AmountOutService {
-  private tokenHandler: TokenHandler;
+
   private readonly logger = new Logger(AmountOutService.name);
 
-  constructor(@InjectRedis() private readonly redisClient: Redis) {
-    this.tokenHandler = new TokenHandler(redisClient);
-  }
+  constructor(
+    private readonly tokenHandler: TokenHandler
+  ) {}
 
   async getAmountOut(fromTokenAddress: string, toTokenAddress: string, amountIn: number): Promise<AmountOutDto> {
     try {

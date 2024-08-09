@@ -1,5 +1,5 @@
 import { connect, Connection, Channel, ConsumeMessage } from 'amqplib';
-import {ERROR_MESSAGES} from "../../config/constants";
+import {ERROR_MESSAGES} from "../../../config/constants";
 
 class RabbitMQConsumer {
     private conn: Connection | null = null;

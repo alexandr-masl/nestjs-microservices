@@ -10,6 +10,8 @@ import { CronJobService } from './cron-job/cron-job.service';
 import { GasPriceModule } from './gas-price/gas-price.module';
 import { AmountOutModule } from './amount-out/amount-out.module';
 import { ValidationPipe } from '@nestjs/common';
+import { SharedModule } from './shared/shared.module';
+import { CronJobModule } from './cron-job/cron-job.module';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { ValidationPipe } from '@nestjs/common';
     }),
     ConfigModule.forRoot(),
     GasPriceModule,
-    AmountOutModule
+    AmountOutModule,
+    SharedModule,
+    CronJobModule
   ],
   providers: [
     {

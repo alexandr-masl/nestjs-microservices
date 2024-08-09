@@ -1,7 +1,12 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 
-export class TokenCacheService {
-  constructor(private readonly redisClient: Redis) {}
+@Injectable()
+export class DataCacheService {
+  constructor(
+    @InjectRedis() private readonly redisClient: Redis,
+  ) {}
 
   async getCacheValue(key: string): Promise<string | null> {
     return this.redisClient.get(key);
