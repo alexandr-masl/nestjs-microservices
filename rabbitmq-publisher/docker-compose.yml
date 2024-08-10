@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  rabbitmq-publisher:
+    build:
+      context: ..
+      dockerfile: ./rabbitmq-publisher/Dockerfile.publisher
+    volumes:
+      - ../:/app
+    working_dir: /app/rabbitmq-publisher
+    command: ["node", "cron-publisher.js"]
+    environment:
+      RABBITMQ_URL: 'amqp://rabbitmq'
+    depends_on:
+      rabbitmq:
+        condition: service_healthy

@@ -1,73 +1,124 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Trading Microservices
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Overview
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This application is designed to provide real-time Ethereum gas price monitoring and facilitate token swap calculations using cached data for faster responses. The application is built with NestJS and incorporates several key modules to handle different responsibilities. It leverages RabbitMQ for message-driven events, cron jobs for scheduled tasks, and Redis for caching data to ensure optimal performance.
 
-## Description
+## Table of Contents
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Overview](#overview)
+- [Application Flow](#application-flow)
+- [Modules](#modules)
+  - [Gas Price Module](#gas-price-module)
+  - [Amount-Out Module](#amount-out-module)
+  - [Cron Job Module](#cron-job-module)
+  - [Shared Module](#shared-module)
+- [Key Features](#key-features)
+- [Setup and Installation](#setup-and-installation)
+- [Usage](#usage)
+- [Conclusion](#conclusion)
 
-## Installation
+## Application Flow
 
-```bash
-$ npm install
-```
+1. **Gas Price Update via RabbitMQ and Cron Job:**
+   - A cron job runs periodically, publishing a message to a RabbitMQ queue (`gas-price-update`) to signal the application to update the Ethereum gas price.
+   - The `CronJobModule` listens for these messages and, upon receiving one, fetches the latest gas price from the Ethereum network.
+   - The fetched gas price is then cached in Redis for quick retrieval.
 
-## Running the app
+2. **Token Swap Calculation:**
+   - Users can request the expected output of a token swap through the `AmountOutModule`.
+   - The `AmountOutService` calculates the output by retrieving the required token pair reserves from Uniswap, performing necessary calculations, and using cached data (like token decimals and pair addresses) to optimize the process.
+   - The calculated result is then returned to the user.
 
-```bash
-# development
-$ npm run start
+3. **Caching for Performance:**
+   - All critical data, including gas prices, token decimals, and pair addresses, are cached using Redis. This reduces the need to repeatedly fetch data from the blockchain, significantly improving the application's response time.
 
-# watch mode
-$ npm run start:dev
+## Modules
 
-# production mode
-$ npm run start:prod
-```
+### Gas Price Module
 
-## Test
+- **Purpose**: Manages the retrieval and caching of Ethereum gas prices.
+- **Key Components**:
+  - **`GasPriceService`**: Fetches the latest gas price from the Ethereum network and caches it in Redis.
+  - **`GasPriceController`**: Exposes an API endpoint to retrieve the cached gas price.
+  - **`GasPriceDto`**: Data Transfer Object representing the structure of the gas price response.
 
-```bash
-# unit tests
-$ npm run test
+### Amount-Out Module
 
-# e2e tests
-$ npm run test:e2e
+- **Purpose**: Calculates the expected output amount when swapping tokens on Uniswap.
+- **Key Components**:
+  - **`AmountOutService`**: Handles the logic for calculating the output amount of a token swap.
+  - **`TokenHandler`**: Orchestrates the retrieval of token-related data and calculations, leveraging caching and blockchain services.
+  - **`AmountOutController`**: Exposes an API endpoint for users to request token swap calculations.
+  - **`AmountOutDto`**: Data Transfer Object for handling and validating user input for token swap requests.
 
-# test coverage
-$ npm run test:cov
-```
+### Cron Job Module
 
-## Support
+- **Purpose**: Listens for gas price update events and triggers the fetching of the latest gas price.
+- **Key Components**:
+  - **`CronJobService`**: Listens to RabbitMQ events and, upon receiving an event, fetches and updates the Ethereum gas price.
+  - **`RabbitMQConsumer`**: A utility class for connecting to RabbitMQ and consuming messages from a specific queue.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Shared Module
 
-## Stay in touch
+- **Purpose**: Provides shared services like caching to be used across the application.
+- **Key Components**:
+  - **`DataCacheService`**: Manages interaction with Redis for caching data like gas prices, token decimals, and pair addresses.
+  - **`TokenHandlerErrorData`**: Custom error handling for token-related operations, ensuring consistency and clarity in error messaging.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Key Features
 
-## License
+- **Real-Time Gas Price Updates**: The application ensures that Ethereum gas prices are updated in real-time by listening to RabbitMQ events triggered by a cron job.
+- **Optimized Token Swap Calculations**: Utilizes cached data for token-related operations to provide quick and efficient token swap calculations.
+- **Scalable Architecture**: Modular design allows for easy scaling and extension of the application, such as adding new features or supporting additional blockchain networks.
+- **Robust Error Handling**: Consistent and clear error handling across the application, ensuring that issues are identified and managed effectively.
+- **Comprehensive Caching**: Redis is used extensively to cache critical data, reducing the need for repeated blockchain queries and improving overall performance.
 
-Nest is [MIT licensed](LICENSE).
+## Setup and Installation
+
+### Prerequisites
+
+- Node.js and npm
+- Redis server
+- RabbitMQ server
+- Alchemy API Key for Ethereum network access
+
+### Installation
+
+1. Clone the repository:
+
+2. Install the dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Configure the environment variables:
+
+   Create a `.env` file in the root directory and add the necessary environment variables, such as the Redis connection details, RabbitMQ URL, and Alchemy API key.
+
+4. Start the application:
+
+   ```bash
+   npm run start
+   ```
+
+5. Start the Cron-Publisher:
+
+   ```bash
+   npm run publisher
+   ```
+
+## Usage
+
+### API Endpoints
+
+- **Get Gas Price**: `GET /gas-price`
+  - Retrieves the latest cached Ethereum gas price.
+- **Calculate Token Swap Output**: `GET /amount-out/:fromTokenAddress/:toTokenAddress/:amountIn`
+  - Returns the expected output amount for a given token swap.
+
+
+## Conclusion
+
+This application provides a robust and efficient way to monitor Ethereum gas prices and calculate token swaps using Uniswap. By leveraging RabbitMQ for event-driven updates, cron jobs for scheduling tasks, and Redis for caching, it ensures that data is always up-to-date and that responses are delivered quickly. The modular design allows for easy extension and scalability, making it suitable for a variety of blockchain-related applications.

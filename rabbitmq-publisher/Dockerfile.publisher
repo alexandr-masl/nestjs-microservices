@@ -1,0 +1,17 @@
+# Use an official Node.js runtime as a parent image
+FROM node:16-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the root package.json and package-lock.json files from the parent directory
+COPY ../package*.json ./
+
+# Install the dependencies
+RUN npm install --production
+
+# Copy only the rabbitmq-publisher directory content
+COPY . .
+
+# Define the command to run the publisher script
+CMD ["node", "cron-publisher.js"]
