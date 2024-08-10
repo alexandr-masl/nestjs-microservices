@@ -2,6 +2,7 @@ import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { GasPriceDto } from './gas-price.dto';
 import { PATHS, ERROR_MESSAGES } from '../../config/constants';
 import { DataCacheService } from '../shared/services/data-cache.service';
+import { TokenHandlerErrorData } from '../shared/services/error-handler.service';
 
 @Injectable()
 export class GasPriceService {
@@ -26,17 +27,21 @@ export class GasPriceService {
       // Check if the gas price is not available in the cache
       if (!gasPrice) {
         // Throw an HTTP exception with a 404 status if the gas price is not found
-        throw new HttpException(ERROR_MESSAGES.GAS_PRICE_NOT_AVAILABLE, HttpStatus.NOT_FOUND);
+        throw new TokenHandlerErrorData(ERROR_MESSAGES.GAS_PRICE_NOT_AVAILABLE);
       }
 
       // Return the cached gas price wrapped in a GasPriceDto
       return { gasPrice };
-    } catch (error) {
-      // Log the error with a custom error message
-      this.logger.error(ERROR_MESSAGES.GAS_PRICE_RETRIEVE_ERROR, error);
 
-      // Throw a general HTTP exception with a 500 status for any unexpected errors
-      throw new HttpException(ERROR_MESSAGES.UNEXPECTED_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    } catch (error) {
+      // Handle known errors from the TokenHandler
+      if (error instanceof TokenHandlerErrorData) {
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+      } else {
+        // Log the error with a custom error message
+        this.logger.error(ERROR_MESSAGES.GAS_PRICE_RETRIEVE_ERROR, error);
+        throw new HttpException(ERROR_MESSAGES.UNEXPECTED_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+  }
   }
 }

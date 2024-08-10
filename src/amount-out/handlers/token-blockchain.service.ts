@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { PATHS, UNISWAP, ERROR_MESSAGES } from "../../../config/constants";
-import { TokenHandlerErrorData } from './error-handler';
+import { TokenHandlerErrorData } from '../../shared/services/error-handler.service';
 
 // Initialize the ethers provider using the configured Alchemy API
 const provider = new ethers.JsonRpcProvider(PATHS.ALCHEMY_API);

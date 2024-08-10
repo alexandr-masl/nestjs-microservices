@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { ERROR_MESSAGES } from "../../../config/constants";
-import { TokenHandlerErrorData } from './error-handler';
+import { TokenHandlerErrorData } from '../../shared/services/error-handler.service';
 import { TokenBlockchainService } from './token-blockchain.service';
 import { TokenCalculationService } from './token-calculation.service';
 import { DataCacheService } from '../../shared/services/data-cache.service';

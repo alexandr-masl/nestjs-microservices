@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { ERROR_MESSAGES, UNISWAP } from "../../../config/constants";
-import { TokenHandlerErrorData } from './error-handler';
+import { TokenHandlerErrorData } from '../../shared/services/error-handler.service';
 
 /**
  * TokenCalculationService provides methods for calculating Uniswap-related data,

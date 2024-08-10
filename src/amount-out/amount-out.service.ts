@@ -1,7 +1,7 @@
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { AmountOutDto } from './dto/amount-out.dto';
 import { TokenHandler } from './handlers/token-handler.service';
-import { TokenHandlerErrorData } from './handlers/error-handler';
+import { TokenHandlerErrorData } from '../shared/services/error-handler.service';
 import { ERROR_MESSAGES } from '../../config/constants';
 
 @Injectable()
