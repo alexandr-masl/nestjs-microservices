@@ -1,6 +1,0 @@
-
-
-brew info rabbitmq
-
-CONF_ENV_FILE="/usr/local/etc/rabbitmq/rabbitmq-env.conf" /usr/local/opt/rabbitmq/sbin/rabbitmq-server
- 

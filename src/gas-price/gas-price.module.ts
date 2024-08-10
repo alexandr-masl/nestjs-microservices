@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { GasPriceController } from './gas-price.controller';
 import { GasPriceService } from './gas-price.service';
-import { SharedModule } from 'src/shared/shared.module';
+import { SharedModule } from '../shared/shared.module';
 
 @Module({
   imports: [SharedModule],

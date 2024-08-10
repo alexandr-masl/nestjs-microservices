@@ -4,7 +4,7 @@ import { AmountOutController } from './amount-out.controller';
 import { TokenBlockchainService } from './handlers/token-blockchain.service';
 import { TokenCalculationService } from './handlers/token-calculation.service';
 import { TokenHandler } from './handlers/token-handler.service';
-import { SharedModule } from 'src/shared/shared.module';
+import { SharedModule } from '../shared/shared.module';
 
 @Module({
   imports: [SharedModule], // Import the SharedModule, which may include common services like caching or logging

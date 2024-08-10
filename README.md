@@ -4,6 +4,16 @@
 
 This application is designed to provide real-time Ethereum gas price monitoring and facilitate token swap calculations using cached data for faster responses. The application is built with NestJS and incorporates several key modules to handle different responsibilities. It leverages RabbitMQ for message-driven events, cron jobs for scheduled tasks, and Redis for caching data to ensure optimal performance.
 
+
+## Scalability and Orchestration
+
+Given that the application uses RabbitMQ for message-driven communication, it is designed to scale horizontally by launching multiple instances of the application. RabbitMQ will distribute events across these instances, allowing the system to handle increased loads efficiently.
+
+For production environments, this application is intended to be orchestrated using Kubernetes, which will manage the deployment, scaling, and monitoring of the application instances. Nginx may also be used as a reverse proxy and load balancer to distribute incoming traffic across multiple instances, ensuring high availability and reliability.
+
+While Docker and Docker Compose configurations are provided within the project for local development and testing purposes, the full setup, including Kubernetes and Nginx configurations, should be tailored and implemented on the production server. These production-specific configurations are not fully described in this document, as they depend on the specific requirements and infrastructure of the deployment environment.
+
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -83,9 +93,15 @@ This application is designed to provide real-time Ethereum gas price monitoring 
 - RabbitMQ server
 - Alchemy API Key for Ethereum network access
 
+
 ### Installation
 
 1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/alexandr-masl/nestjs-microservices.git
+   cd your-repository
+   ```
 
 2. Install the dependencies:
 
@@ -97,19 +113,66 @@ This application is designed to provide real-time Ethereum gas price monitoring 
 
    Create a `.env` file in the root directory and add the necessary environment variables, such as the Redis connection details, RabbitMQ URL, and Alchemy API key.
 
-4. Start the application:
+4. Start the Redis server:
+
+   ```bash
+   redis-server
+   ```
+
+   This command will launch the Redis server locally on port 6379, which is required for caching data in the application.
+
+5. Start the RabbitMQ server:
+
+   ```bash
+   rabbitmq-server
+   ```
+
+   This command will launch the RabbitMQ server locally on port 5672 (for messaging) and port 15672 (for management UI). The RabbitMQ server is essential for handling the application's message-driven events.
+
+6. Start the application:
 
    ```bash
    npm run start
    ```
 
-5. Start the Cron-Publisher:
+7. Start the Cron-Publisher:
 
    ```bash
    npm run publisher
    ```
 
-## Usage
+### Testing
+
+1. Run unit tests:
+
+   ```bash
+   npm run test
+   ```
+
+   This command will execute all unit tests in the application using Jest.
+
+2. Run end-to-end (e2e) tests:
+
+   ```bash
+   npm run test:e2e
+   ```
+
+   This command will execute all end-to-end tests using the Jest configuration located in `./test/jest-e2e.json`.
+
+
+### Example Usage
+
+To test the `GET /gasPrice` endpoint using Swagger UI:
+
+1. Navigate to the Swagger UI at `http://localhost:3000/api`.
+2. Scroll down to the `GasPriceController` section.
+3. Click on the `GET /gasPrice` endpoint to expand it.
+4. Click the `Try it out` button.
+5. Click the `Execute` button.
+6. View the response in the `Response` section below.
+
+This allows you to see the gas price fetched by the application.
+
 
 ### API Endpoints
 
@@ -117,6 +180,56 @@ This application is designed to provide real-time Ethereum gas price monitoring 
   - Retrieves the latest cached Ethereum gas price.
 - **Calculate Token Swap Output**: `GET /amount-out/:fromTokenAddress/:toTokenAddress/:amountIn`
   - Returns the expected output amount for a given token swap.
+
+
+# .env.example
+REDIS_URL=redis://localhost:6379
+RABBITMQ_URL=amqp://localhost:5672
+ALCHEMY_API_KEY=your-alchemy-api-key
+
+
+### Security, Stability, and Performance Features
+
+1. **Rate Limiting**
+   - Protects the API from abuse by limiting the number of requests a client can make within a specified time frame.
+
+2. **Cross-Origin Resource Sharing (CORS) Configuration**
+   - Restricts which domains can access the API, enhancing security.
+
+3. **Security Best Practices**
+   - HTTPS for secure data transmission.
+   - Input sanitization to prevent SQL injection, XSS, and other attacks.
+   - Environment variables for managing sensitive configuration values.
+   - Helmet middleware for securing the app by setting various HTTP headers.
+
+4. **Performance Optimization**
+   - Caching to reduce load and improve response times.
+   - Designed for load balancing across multiple instances.
+   - Optimized database queries for performance.
+
+5. **Logging and Monitoring**
+   - Logging of key events and errors for troubleshooting.
+   - Monitoring tools recommended for tracking application performance.
+
+6. **Error Handling and Input Validation**
+   - Granular error handling, particularly for interactions with external systems like Ethereum contracts.
+   - Enforced input validation to ensure data integrity.
+
+7. **API Documentation**
+   - Comprehensive API documentation using Swagger.
+
+8. **Graceful Shutdown**
+   - Ensures the application shuts down cleanly without data loss.
+
+9. **Port Configuration Best Practices**
+   - Port configuration via environment variables.
+   - Use of reverse proxy (e.g., Nginx) to manage traffic.
+   - Application server runs on an internal network, with only the reverse proxy exposed.
+
+10. **Kubernetes and Nginx for Orchestration**
+    - Application is designed to support multiple instances with event distribution via RabbitMQ.
+    - Full orchestration and load balancing can be handled by Kubernetes and Nginx in a production environment.
+
 
 
 ## Conclusion
