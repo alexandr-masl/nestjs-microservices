@@ -9,8 +9,7 @@ const { Logger } = require('@nestjs/common'); // NestJS Logger for logging messa
 const CHANNEL = "gas-price-update";
 
 // RabbitMQ endpoint URL for the development environment
-// const RABBIT_MQ_ENDPOINT_DEV = 'amqp://localhost';
-const RABBIT_MQ_ENDPOINT_DEV = "amqp://guest:guest@rabbitmq"
+const RABBIT_MQ_ENDPOINT_DEV = process.env.PROD === 'PRODUCTION' ? process.env.RABBITMQ_PRODUCTION_URL : 'amqp://localhost';
 
 // Cron schedule interval for gas price updates
 // This cron schedule runs the task every 7 seconds

@@ -6,7 +6,9 @@ export const PATHS = {
     AMOUNT_OUT: "return",
     RABBIT_MQ_ENDPOINT_DEV: 'amqp://localhost',
     RABBIT_MQ_ENDPOINT_PROD: `amqp://guest:guest@rabbitmq`,
-    ALCHEMY_API: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`
+    ALCHEMY_API: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
+    REDIS_PRODUCTION_URL: "",
+    REDIS_DEV_URL: 'redis://localhost:6379'
 };
   
 export const EVENTS = {

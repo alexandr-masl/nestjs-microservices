@@ -47,7 +47,7 @@ describe('GasPriceService', () => {
   
     // Act & Assert
     await expect(service.getCachedGasPrice()).rejects.toThrowError(
-      new HttpException('An unexpected error occurred. Please try again later.', HttpStatus.INTERNAL_SERVER_ERROR),
+      new HttpException('Gas price not available', HttpStatus.INTERNAL_SERVER_ERROR),
     );
     expect(mockDataCacheService.getCacheValue).toHaveBeenCalledWith('gasPrice');
   });
