@@ -182,13 +182,13 @@ This allows you to see the gas price fetched by the application.
   - Returns the expected output amount for a given token swap.
 
 
-# .env.example
+### .env.example
 REDIS_URL=redis://localhost:6379
 RABBITMQ_URL=amqp://localhost:5672
 ALCHEMY_API_KEY=your-alchemy-api-key
 
 
-### Security, Stability, and Performance Features
+# Security, Stability, and Performance Features
 
 1. **Rate Limiting**
    - Protects the API from abuse by limiting the number of requests a client can make within a specified time frame.
