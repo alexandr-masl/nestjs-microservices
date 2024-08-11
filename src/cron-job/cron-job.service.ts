@@ -15,9 +15,14 @@ export class CronJobService implements OnModuleInit {
   ) {
     // Initialize the Ethereum provider using Alchemy API
     this.provider = new ethers.JsonRpcProvider(PATHS.ALCHEMY_API);
+
     // Initialize RabbitMQConsumer with the provided RabbitMQ endpoint
-    const rabbitUrl = process.env.PROD === 'PRODUCTION' ? process.env.REDIS_PRODUCTION_URL : PATHS.RABBIT_MQ_ENDPOINT_DEV;
-    this.rabbitMQConsumer = new RabbitMQConsumer(rabbitUrl);
+
+    const PRODUCTION = process.env.APP === 'PRODUCTION';
+    // RabbitMQ endpoint URL for the development environment
+    const RABBIT_MQ_ENDPOINT = PRODUCTION ? process.env.RABBIT_MQ_PRODUCTION_URL : PATHS.RABBIT_MQ_ENDPOINT_DEV;
+    this.logger.log(`Launching Container: ${PRODUCTION}`);
+    this.rabbitMQConsumer = new RabbitMQConsumer(RABBIT_MQ_ENDPOINT);
   }
 
   // This method runs automatically when the module is initialized
