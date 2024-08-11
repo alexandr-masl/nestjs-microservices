@@ -1,7 +1,7 @@
 // Import necessary modules and classes
-const RabbitMQPublisher = require('./rabbitmq-publisher'); // Custom RabbitMQ publisher module
-const cron = require('node-cron'); // Node.js cron job scheduler
-const { Logger } = require('@nestjs/common'); // NestJS Logger for logging messages
+import * as cron from 'node-cron'; // Node.js cron job scheduler
+import { Logger } from '@nestjs/common'; // NestJS Logger for logging messages
+import { RabbitMQPublisher } from './rabbitmq-publisher'; // Custom RabbitMQ publisher module
 
 // --- CONFIGURATION CONSTANTS --- //
 
@@ -24,7 +24,7 @@ const logger = new Logger('CronJob');
  * Function to stop all currently scheduled cron jobs.
  * This is useful to ensure that no multiple cron jobs are running concurrently.
  */
-function stopAllCronJobs() {
+function stopAllCronJobs(): void {
     const tasks = cron.getTasks();
     tasks.forEach(task => task.stop());
     logger.log('Stopped all previous cron jobs');
@@ -36,8 +36,8 @@ function stopAllCronJobs() {
  * @param {Object} msg - The message object to be published. It will be stringified before sending.
  * @throws {Error} - Throws an error if the message publishing fails.
  */
-async function publishToGasPriceUpdate(msg) {
-    let publisher;
+async function publishToGasPriceUpdate(msg: object): Promise<void> {
+    let publisher: RabbitMQPublisher | undefined;
     try {
         publisher = new RabbitMQPublisher(RABBIT_MQ_ENDPOINT_DEV); // Create a new RabbitMQPublisher instance
         await publisher.connect(); // Connect to the RabbitMQ server
@@ -45,7 +45,7 @@ async function publishToGasPriceUpdate(msg) {
         logger.log(`Message published to ${CHANNEL}: ${published}`); // Log success message
     } catch (error) {
         logger.error('Error publishing message:', error); // Log any errors encountered during publishing
-        throw new Error('Error:', error); // Re-throw the error
+        throw new Error(`Error: ${error.message}`); // Re-throw the error
     } finally {
         if (publisher) {
             await publisher.close(); // Ensure the connection is closed after publishing
@@ -67,7 +67,7 @@ const scheduledTask = cron.schedule(GAS_PRICE_CRON_SCHEDULE_INTERVAL, async () =
  *
  * @param {string} signal - The signal received by the process, e.g., 'SIGTERM' or 'SIGINT'.
  */
-function shutdown(signal) {
+function shutdown(signal: string): void {
     logger.log(`Received ${signal}. Shutting down gracefully...`);
     scheduledTask.stop(); // Stop the current scheduled task
     stopAllCronJobs(); // Ensure all cron jobs are stopped
