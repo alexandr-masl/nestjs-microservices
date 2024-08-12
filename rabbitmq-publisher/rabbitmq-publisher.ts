@@ -1,20 +1,21 @@
-// Import the 'connect' function from the 'amqplib' library
-const { connect } = require('amqplib');
+import { connect, Connection, Channel } from 'amqplib';
 
 /**
  * RabbitMQPublisher is a class responsible for managing connections 
  * to a RabbitMQ server and publishing messages to a specific queue.
  */
-class RabbitMQPublisher {
+export class RabbitMQPublisher {
+    private url: string;
+    private conn: Connection | null = null;
+    private channel: Channel | null = null;
+
     /**
      * Constructor to initialize the RabbitMQPublisher.
      *
      * @param {string} url - The URL of the RabbitMQ server to connect to.
      */
-    constructor(url) {
-        this.url = url; // URL of the RabbitMQ server
-        this.conn = null; // Holds the connection object
-        this.channel = null; // Holds the channel object
+    constructor(url: string) {
+        this.url = url;
     }
 
     /**
@@ -22,12 +23,13 @@ class RabbitMQPublisher {
      *
      * @throws {Error} - Throws an error if the connection or channel creation fails.
      */
-    async connect() {
-        // Establish a connection to the RabbitMQ server
-        this.conn = await connect(this.url);
-
-        // Create a channel on the established connection
-        this.channel = await this.conn.createChannel();
+    async connect(): Promise<void> {
+        try {
+            this.conn = await connect(this.url); // Establish a connection to the RabbitMQ server
+            this.channel = await this.conn.createChannel(); // Create a channel on the established connection
+        } catch (error) {
+            throw new Error(`Failed to connect to RabbitMQ: ${error.message}`);
+        }
     }
 
     /**
@@ -38,8 +40,7 @@ class RabbitMQPublisher {
      * @returns {boolean} - Returns true if the message is successfully sent to the queue.
      * @throws {Error} - Throws an error if the channel is not initialized.
      */
-    async publish(queue, message) {
-        // Ensure the channel is initialized before publishing
+    async publish(queue: string, message: string): Promise<boolean> {
         if (!this.channel) {
             throw new Error('Cannot publish message. Channel not initialized.');
         }
@@ -54,18 +55,13 @@ class RabbitMQPublisher {
     /**
      * Closes the channel and connection to the RabbitMQ server.
      */
-    async close() {
-        // Close the channel if it is open
+    async close(): Promise<void> {
         if (this.channel) {
             await this.channel.close();
         }
 
-        // Close the connection if it is open
         if (this.conn) {
             await this.conn.close();
         }
     }
 }
-
-// Export the RabbitMQPublisher class for use in other modules
-module.exports = RabbitMQPublisher;

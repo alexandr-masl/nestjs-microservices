@@ -8,4 +8,11 @@ services:
     volumes:
       - ../:/app
     working_dir: /app/rabbitmq-publisher
-    command: ["node", "cron-publisher.js"]
+    command: ["npm", "run", "cron-publisher"]
+    networks:
+      - mynetwork
+    restart: always
+
+networks:
+  mynetwork:
+    external: true
