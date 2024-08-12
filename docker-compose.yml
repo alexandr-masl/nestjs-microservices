@@ -10,5 +10,11 @@ services:
       - /app/node_modules
     ports:
       - "3000:3000"
-    environment:
-      NODE_ENV: production
+    networks:
+      - mynetwork
+    restart: always
+
+
+networks:
+  mynetwork:
+    external: true

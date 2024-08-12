@@ -11,7 +11,7 @@ Given that the application uses RabbitMQ for message-driven communication, it is
 
 For production environments, this application is intended to be orchestrated using Kubernetes, which will manage the deployment, scaling, and monitoring of the application instances. Nginx may also be used as a reverse proxy and load balancer to distribute incoming traffic across multiple instances, ensuring high availability and reliability.
 
-While Docker and Docker Compose configurations are provided within the project for local development and testing purposes, the full setup, including Kubernetes and Nginx configurations, should be tailored and implemented on the production server. These production-specific configurations are not fully described in this document, as they depend on the specific requirements and infrastructure of the deployment environment.
+While Docker, Docker Compose and Nginx configurations are provided within the project for local development and testing purposes, the full setup, including Kubernetes and Nginx configurations, should be tailored and implemented on the production server. These production-specific configurations are not fully described in this document, as they depend on the specific requirements and infrastructure of the deployment environment.
 
 
 ## Table of Contents
@@ -113,7 +113,59 @@ While Docker and Docker Compose configurations are provided within the project f
 
    Create a `.env` file in the root directory and add the necessary environment variables, such as the Redis connection details, RabbitMQ URL, and Alchemy API key.
 
-4. Start the Redis server:
+### Running the Application with Docker Compose
+
+To run the entire application stack, including Redis, RabbitMQ, and the NestJS application, using Docker Compose, follow these steps:
+
+4. **Create a Docker Network for the Microservices:**
+
+   ```bash
+   docker network create mynetwork
+   ```
+
+   This command creates a custom Docker network that allows the different services (Redis, RabbitMQ, and your NestJS app) to communicate with each other.
+
+5. **Launch the Redis and RabbitMQ Services:**
+
+   ```bash
+   docker run -d --name rabbitmq-server --network mynetwork -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+   ```
+
+   This command launches the RabbitMQ server within the `mynetwork` Docker network. The server will be accessible on port 5672 for messaging and port 15672 for the management UI.
+
+   ```bash
+   docker run -d --name redis-server --network mynetwork -p 6379:6379 redis:6-alpine
+   ```
+
+   This command launches the Redis server within the `mynetwork` Docker network, available on port 6379.
+
+6. **Start the NestJS Application:**
+
+   From the root directory of your project, run:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+   This command builds and starts the NestJS application, which will now be running and connected to the Redis and RabbitMQ services.
+
+7. **Start the RabbitMQ Publisher:**
+
+   Navigate to the `rabbitmq-publisher` directory and run:
+
+   ```bash
+   cd rabbitmq-publisher
+   docker-compose up --build
+   ```
+
+   This command builds and starts the RabbitMQ publisher service, which will publish messages to RabbitMQ as scheduled.
+
+
+### Starting the Application Manually (Without Docker)
+
+If you prefer to run the application manually on your local machine without Docker:
+
+4. **Start the Redis Server:**
 
    ```bash
    redis-server
@@ -121,7 +173,7 @@ While Docker and Docker Compose configurations are provided within the project f
 
    This command will launch the Redis server locally on port 6379, which is required for caching data in the application.
 
-5. Start the RabbitMQ server:
+5. **Start the RabbitMQ Server:**
 
    ```bash
    rabbitmq-server
@@ -129,17 +181,18 @@ While Docker and Docker Compose configurations are provided within the project f
 
    This command will launch the RabbitMQ server locally on port 5672 (for messaging) and port 15672 (for management UI). The RabbitMQ server is essential for handling the application's message-driven events.
 
-6. Start the application:
+6. **Start the Application:**
 
    ```bash
    npm run start
    ```
 
-7. Start the Cron-Publisher:
+7. **Start the Cron-Publisher:**
 
    ```bash
    npm run publisher
    ```
+
 
 ### Testing
 
