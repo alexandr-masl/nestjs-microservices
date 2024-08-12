@@ -190,7 +190,7 @@ If you prefer to run the application manually on your local machine without Dock
 7. **Start the Cron-Publisher:**
 
    ```bash
-   npm run publisher
+   npm run cron-publisher
    ```
 
 
