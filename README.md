@@ -176,18 +176,24 @@ If you prefer to run the application manually on your local machine without Dock
 5. **Start the RabbitMQ Server:**
 
    ```bash
-   rabbitmq-server
+   brew info rabbitmq
+
    ```
 
-   This command will launch the RabbitMQ server locally on port 5672 (for messaging) and port 15672 (for management UI). The RabbitMQ server is essential for handling the application's message-driven events.
+   This command will launch the RabbitMQ interface. Follow the instructions provided in the opened window to start the RabbitMQ server locally. The RabbitMQ server is essential for handling the application's message-driven events.
 
 6. **Start the Application:**
 
    ```bash
    npm run start
    ```
+7. **Compile the Cron-Publisher:**
 
-7. **Start the Cron-Publisher:**
+   ```bash
+   npx tsc
+   ```
+
+8. **Start the Cron-Publisher:**
 
    ```bash
    npm run cron-publisher
